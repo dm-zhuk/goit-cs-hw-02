@@ -1,21 +1,22 @@
-# Docker-команда FROM вказує базовий образ контейнера
-# Наш базовий образ - це Linux з попередньо встановленим python-3.10
-FROM python:3.13
+FROM python:3.10-alpine3.20
 
-# Встановимо змінну середовища
-ENV APP_HOME /app
+ENV APP_HOME=/app
 
-# Встановимо робочу директорію всередині контейнера
 WORKDIR $APP_HOME
 
-# Скопіюємо інші файли в робочу директорію контейнера
+RUN apk add --no-cache \
+gcc \
+postgresql-client \
+libpq-dev \
+python3-dev
+
 COPY . .
 
-# Встановимо залежності всередині контейнера
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Позначимо порт, де працює застосунок всередині контейнера
-EXPOSE 5000
+EXPOSE 8000
 
-# Запустимо наш застосунок всередині контейнера
-ENTRYPOINT ["python3", "app.py"]
+ENTRYPOINT ["python3", "main.py"]
+
+# Command to run app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
